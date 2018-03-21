@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SmartID</string>
+    <string name="faceActivity">Reconnaissance du Visage</string>
+    <string name="TAG">MainActivity</string>
+    <string name="TAGSERVICE">Service</string>
+    <string name="title_activity_gait_training">Reconnaissance de Mouvement</string>
+    <string name="title_activity_main2">Main2Activity</string>
+</resources>

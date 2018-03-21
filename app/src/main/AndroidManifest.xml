@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="ca.uqac.nyemo">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <uses-feature android:name="android.hardware.Sensor" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
+
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+       >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="ca.uqac.nyemo.MainActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="ca.uqac.nyemo.face.FaceActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/faceActivity"
+            android:screenOrientation="portrait" />
+
+        <receiver android:name="ca.uqac.nyemo.receivers.AppReceiver">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="ca.uqac.nyemo.face.LockServiceFilter" />
+        <service
+            android:name="ca.uqac.nyemo.face.FaceTrainerService"
+            android:exported="false" />
+        <service
+            android:name="ca.uqac.nyemo.move.SensorService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name="ca.uqac.nyemo.move.GaitTrainActivity" />
+
+        <service
+            android:name="ca.uqac.nyemo.move.GaitTrainInfoService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name="ca.uqac.nyemo.voice.VoiceRecordActivity"></activity>
+    </application>
+
+</manifest>
