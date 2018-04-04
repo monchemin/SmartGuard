@@ -248,12 +248,13 @@ public class VoiceRecordActivity extends Activity {
                 @Override
                 public void run() {
                     //audioRecord();
-                    mcountDownTimer.start();
+
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    mcountDownTimer.start();
                     voiceRecorder = new VoiceRecorder();
                     voiceRecorder.startRecording();
 

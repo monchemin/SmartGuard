@@ -35,7 +35,7 @@ public class VoiceRecorder {
             bufferSize = 44100 * 2;
         }
 
-        Log.i(TAG, "buffer size " + bufferSize);
+       // Log.i(TAG, "buffer size " + bufferSize);
         // create instance of audio record with record information
         recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
                 Audio.SAMPLE_RATE, Audio.CHANNEL_TYPE, Audio.ENCODINF_FORMAT, bufferSize);
@@ -46,7 +46,7 @@ public class VoiceRecorder {
 
 
         int state = recorder.getState(); // get state for checking
-        Log.i(TAG, "state before: " +  state);
+       // Log.i(TAG, "state before: " +  state);
 
         if (state == AudioRecord.STATE_INITIALIZED) {
             try {
@@ -85,7 +85,7 @@ public class VoiceRecorder {
 
 protected void recordingProcess() {
     short[] audioBuffer = new short[bufferSize / 2];
-    Log.i(TAG, "isrec: " + isRecording);
+   // Log.i(TAG, "isrec: " + isRecording);
     long start = System.currentTimeMillis();
 
     int shortsRead = 0;
