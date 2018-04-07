@@ -4,13 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
@@ -20,21 +15,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
 
 import ca.uqac.nyemo.R;
 import ca.uqac.nyemo.utils.AppString;
 import ca.uqac.nyemo.utils.PermissionRequest;
-import ca.uqac.nyemo.utils.SysFonctions;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
-import static ca.uqac.nyemo.utils.SysFonctions.ONE_SECOND;
 import static ca.uqac.nyemo.utils.SysFonctions.TAG;
 
-public class VoiceRecordActivity extends Activity {
+/**
+ * activity for audio record
+ * after recording, features are computed and the model saved
+ */
+public class VoiceRecordActivity extends Activity implements VoiceActivityListener {
 
     ImageView voiceImage;
     Button voiceButton;
@@ -42,10 +37,12 @@ public class VoiceRecordActivity extends Activity {
     SpeechRecognizer mSpeechRecognizer;
     SmartSpeechRecognitionListener mRecognitionListener;
     Intent recognitionItent;
-    Long startTime;
+
     Boolean isRecording = false;
     // Requesting permission to RECORD_AUDIO
     VoiceRecorder voiceRecorder;
+    int recordNumber = 0;
+    VoiceModel voiceTrainFeatures = new VoiceModel();
 
 
 
@@ -89,7 +86,7 @@ public class VoiceRecordActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-
+//audio manager to mute mic
         AudioManager amanager=(AudioManager)getSystemService(Context.AUDIO_SERVICE);
         amanager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true);
         amanager.setStreamMute(AudioManager.STREAM_ALARM, true);
@@ -120,9 +117,9 @@ public class VoiceRecordActivity extends Activity {
                 permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 break;
         }
-        if (!permissionToRecordAccepted ) finish();
+        if (!permissionToRecordAccepted ) finish(); // end activity if no permission
     }
-
+//cancel android speech recognition to release mic for audio record
     public void cancelSpeechRecognition() {
         if(mSpeechRecognizer != null) {
             mSpeechRecognizer.stopListening();
@@ -134,174 +131,67 @@ public class VoiceRecordActivity extends Activity {
 
     }
 
+    /**
+     * initialize speech recognition settings
+     */
     public void intitSpeechRecogntion() {
 
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognitionListener = new SmartSpeechRecognitionListener();
-        mRecognitionListener.initRecorder();
+        mRecognitionListener.setVoiceActivityListener(this);
+       // mRecognitionListener.initRecorder();
+
         mSpeechRecognizer.setRecognitionListener(mRecognitionListener);
         recognitionItent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         recognitionItent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         recognitionItent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fr-FR");
         mSpeechRecognizer.startListening(recognitionItent);
-        startTime = System.currentTimeMillis();
+
+       // initRecorder();
 
     }
 
-    private class SmartSpeechRecognitionListener implements RecognitionListener {
+    @Override
+    public void onBeginningOfSpeech() {
+        Log.i(TAG, "onBeginningOfSpeech: ");
+        voiceButton.setEnabled(false); // turn off button
+        voiceButton.setText(AppString.voiceRecordButtonDesableText);
 
+    }
 
+    /**
+     * call in the end of record
+     * if number of reccords == 3, save model
+     * @param recordFeatures
+     */
+    @Override
+    public void endRecord(double[] recordFeatures) {
 
-
-        private String recordPath = getExternalFilesDir("voice").getAbsolutePath();
-
-   CountDownTimer     mcountDownTimer =  new CountDownTimer(SysFonctions.ONE_SECOND*3, SysFonctions.ONE_SECOND ) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-                Log.i(TAG, "onTick: " + millisUntilFinished/1000);
-
-            }
-
-            @Override
-            public void onFinish() {
-                voiceRecorder.stopRecording();
-                initRecorder();
-
-
-            }
-        };
-
-
-        @Override
-        public void onReadyForSpeech(Bundle params) {
-
-        }
-
-        @Override
-        public void onBeginningOfSpeech() {
-
-            Log.i(TAG, "onBeginningOfSpeech: ");
-            voiceButton.setEnabled(false);
-            voiceButton.setText(AppString.voiceRecordButtonDesableText);
-           audioRecord();
-
-
-
-        }
-
-        @Override
-        public void onRmsChanged(float rmsdB) {
-
-        }
-
-        @Override
-        public void onBufferReceived(byte[] buffer) {
-
-        }
-
-        @Override
-        public void onEndOfSpeech() {
-            Log.i(TAG, "end: ");
-
-
-        }
-
-        @Override
-        public void onError(int error) {
-
-            Long duration = System.currentTimeMillis() - startTime;
-            if (duration < 500 && error == SpeechRecognizer.ERROR_NO_MATCH) {
-                Log.i(TAG, "Doesn't seem like the system tried to listen at all. duration = " + duration + "ms. This might be a bug with onError and startListening methods of SpeechRecognizer");
-                Log.i(TAG, "Going to ignore the error");
-                return;
-            } else {
-                Log.i(TAG, "Error: " + error); }
-
-
-        }
-
-        @Override
-        public void onResults(Bundle results) {
-
-            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            Log.i(TAG, "onResults: " + matches.size());
-
-        }
-
-        @Override
-        public void onPartialResults(Bundle partialResults) {
-
-            Log.i(TAG, "onResults partial: ");
-
-        }
-
-        @Override
-        public void onEvent(int eventType, Bundle params) {
-
-        }
-
-        public void audioRecord() {
-            cancelSpeechRecognition(); // cancel speech recognition service and release mic for record
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    //audioRecord();
-
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    mcountDownTimer.start();
-                    voiceRecorder = new VoiceRecorder();
-                    voiceRecorder.startRecording();
-
-                }
-            }).start();
-            /*
+        voiceTrainFeatures.addEntry(recordFeatures); // add info to model
+        recordNumber++;
+        Log.i(TAG, "recod" + recordFeatures.length);
+        if(recordNumber == 3) {
+            Toast.makeText(getApplicationContext(), "Train done !", Toast.LENGTH_LONG).show();
+            String modelFile = getApplicationContext().getExternalFilesDir(null).getAbsolutePath() + "/voicemodel";
             try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
+                voiceTrainFeatures.saveModel(modelFile);
+            } catch (IOException e) {
                 e.printStackTrace();
-            } */
-/*
-            SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd_HHmmss");
-            String currentDateandTime = sdf.format(new Date());
-            String audioFileName = recordPath + "/" + currentDateandTime + ".3gp";
-
-*/         /* voiceRecorder = new VoiceRecorder();
-            voiceRecorder.startRecording();
-            mcountDownTimer.start(); */
-
-
-
-
-
-
-
-/*
-10 secondes pour faire l'enregistrement et le countdown faire un seul tour
- */
-
-
-
-        }
-        public void initRecorder() {
-
-                voiceButton.setEnabled(true);
-                voiceButton.setText(AppString.voiceRecordButtonNextText);
-                isRecording = false;
-
             }
-
-
-
-
+            finish();
         }
+        voiceText.setText("CLIQUEZ POUR LE TEXTE SUIVANT");
+        initRecorder();
 
+    }
 
+    public void initRecorder() {
+
+        voiceButton.setEnabled(true);
+        voiceButton.setText(AppString.voiceRecordButtonNextText);
+        isRecording = false;
+
+    }
 
 
     }

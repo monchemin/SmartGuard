@@ -2,6 +2,7 @@ package ca.uqac.nyemo.voice;
 
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.FileInputStream;
@@ -22,6 +23,7 @@ public class VoiceRecorder {
     private int bufferSize;
     private Thread recThread = null;
     private boolean isRecording = false;
+    ArrayList<short[]> currentRecord = new ArrayList<>();
 
 
     public VoiceRecorder() {
@@ -84,17 +86,22 @@ public class VoiceRecorder {
 
 
 protected void recordingProcess() {
-    short[] audioBuffer = new short[bufferSize / 2];
+    //short[] audioBuffer = new short[bufferSize / 2];
+    //short[] audioBuffer = new short[512];
    // Log.i(TAG, "isrec: " + isRecording);
     long start = System.currentTimeMillis();
 
     int shortsRead = 0;
     while (isRecording) {
+        short[] audioBuffer = new short[512];
         int numberOfShort = recorder.read(audioBuffer, 0, audioBuffer.length);
         if(numberOfShort != AudioRecord.ERROR_BAD_VALUE && numberOfShort != -1)
         {
             shortsRead += numberOfShort;
+            currentRecord.add(audioBuffer);
             //Log.i(TAG, "shorts read: " + numberOfShort);
+           // for(byte b : audioBuffer) {
+             //   Log.i("TAG", "" + b); }
         }
 
 
@@ -114,7 +121,20 @@ protected void recordingProcess() {
             recorder = null;
             recThread = null;
 
+
         }
+    }
+
+    public double[] getComputeFeatures() throws Exception {
+
+        Log.i(TAG, "Record Size: " + currentRecord.size());
+
+        //ArrayList<double[]> recordFeatures = AudioProcess.computeTrameFeatures(currentRecord);
+        double[] recordFeatures = new AudioProcess().computeSignalFeatures(currentRecord);
+        return recordFeatures;
+       /* Log.i(TAG, "features Size: " + recordFeatures.size());
+        double[] first = recordFeatures.get(0);
+        for (double cf : first) {  Log.i(TAG, "cf : " + cf); } */
     }
 
     public void cancelRecording() {

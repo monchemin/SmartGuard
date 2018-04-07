@@ -7,15 +7,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import ca.uqac.nyemo.MainActivity;
 
 import org.opencv.core.Mat;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
+import static ca.uqac.nyemo.utils.AppClass.VOICE;
 import static org.opencv.imgcodecs.Imgcodecs.imwrite;
 
 /**
@@ -70,6 +81,26 @@ public class SysFonctions {
 
 
 
+public static double[] convertShortToDouble(short[] toConvert) {
+        double[] convert = new double[toConvert.length];
+        for(int i = 0; i < toConvert.length; i++) {
+
+            convert[i] = (double) toConvert[i];
+
+        }
+        return convert;
+}
+
+    public static double[] convertByteToDouble(byte[] toConvert) {
+        double[] convert = new double[toConvert.length];
+        for(int i = 0; i < toConvert.length; i++) {
+
+            convert[i] = (double) toConvert[i];
+
+        }
+        return convert;
+    }
+
 
 
 /*
@@ -96,5 +127,56 @@ public class SysFonctions {
             mediaScanIntent.setData(contentUri);
             this.sendBroadcast(mediaScanIntent); */
    // }
+
+    public static void saveModel(String fileName, Object toWrite) throws IOException {
+        Log.i("FaceActivity", "saveModel: " + fileName);
+
+        ObjectOutputStream oos;
+        try {
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(
+                            new FileOutputStream(
+                                    new File(fileName))));
+            oos.writeObject(toWrite);
+
+            oos.close();
+        } catch (FileNotFoundException fe) {
+            fe.printStackTrace();
+        } catch (IOException e) {e.printStackTrace();}
+
+
+    }
+
+    /**
+     *
+     * @param modelfile
+     * @return the model
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static Object loadModel(String modelfile) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois;
+        ois = new ObjectInputStream(
+                new BufferedInputStream(
+                        new FileInputStream(
+                                new File(modelfile))));
+
+        try {
+
+            return ois.readObject();
+            //Object o = ois.readObject();
+            //System.out.println(o.getClass());
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }  catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            ois.close();
+        }
+
+        return null;
+    }
 
 }

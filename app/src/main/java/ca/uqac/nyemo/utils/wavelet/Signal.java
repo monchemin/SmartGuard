@@ -15,11 +15,12 @@ package ca.uqac.nyemo.utils.wavelet; /**
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
 import ca.uqac.nyemo.utils.wavelet.gnu.jel.CompilationException;
 import ca.uqac.nyemo.utils.wavelet.gnu.jel.CompiledExpression;
 import ca.uqac.nyemo.utils.wavelet.gnu.jel.Evaluator;
 import ca.uqac.nyemo.utils.wavelet.gnu.jel.Library;
-import java.awt.Color;
 
 /**
  * 
@@ -34,7 +35,7 @@ public class Signal {
 	double[][] xy;
 	String function;
 
-	Color color;
+	//Color color;
 	int pointSize;
 
 	/**

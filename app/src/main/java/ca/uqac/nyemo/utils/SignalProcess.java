@@ -1,5 +1,7 @@
 package ca.uqac.nyemo.utils;
 
+import android.util.Log;
+
 import ca.uqac.nyemo.utils.wavelet.DWT;
 import ca.uqac.nyemo.utils.wavelet.Wavelet;
 import ca.uqac.nyemo.voice.Audio;
@@ -110,10 +112,31 @@ public abstract class SignalProcess {
      */
     public static boolean VoiceActivityDection(double[] sample) throws Exception {
         boolean vad = false; // suppose that no activity
+        double variance = 0;
+
+       // Log.e(SysFonctions.TAG, " trame " );
+      //  for(double e : sample) {Log.e(SysFonctions.TAG, "" + e ); } //
+
         // compute DWT of the trame
         double[] dwt = DWT.forwardDwt(sample, Wavelet.Daubechies, Audio.DAUBECHIES_WAVELET_ORDER, Audio.WAVELET_ORDER);
-        double[] teo = computeTEO(dwt); // compute TEO
-        double variance = computeVariance(teo); // variance of TEO
+      //  for(int di = 0; di < dwt.length; di++) {
+        //    Log.e(SysFonctions.TAG, "trame : " + sample[di] + " dwt : " + dwt[di] );
+       // }
+        int levelLenght = dwt.length;
+        for (int levelIndex = 1; levelIndex <= Audio.WAVELET_ORDER  ; levelIndex++) {
+            levelLenght /= 2 ; // each level length is the half of the previous
+
+            double[] levelSample = new double[levelLenght];
+
+            System.arraycopy(dwt, levelLenght-1, levelSample, 0, levelLenght); // retrieve level coefficients
+           // Log.e(SysFonctions.TAG, " dwt["+levelIndex+"] : " );
+            //for(double e : levelSample) {Log.e(SysFonctions.TAG, "" + e ); }
+            double[] teo = computeTEO(levelSample); // compute TEO
+            variance += computeVariance(teo); // variance of TEO
+
+        }
+
+        //Log.i(SysFonctions.TAG, "VoiceActivityDection: " + variance);
         if (variance >= Audio.VAD_THRESHOLD) // if variance is up defined threshold
         {
             vad = true;
