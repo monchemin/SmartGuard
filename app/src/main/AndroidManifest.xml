@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <uses-feature android:name="android.hardware.Sensor" />
 
@@ -19,21 +21,25 @@
 
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-       >
+        android:supportsRtl="true">
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="ca.uqac.nyemo.MainActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:screenOrientation="portrait">
+            android:name=".FistActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,12 +47,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ca.uqac.nyemo.face.FaceActivity"
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".face.FaceTrainActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/faceActivity"
             android:screenOrientation="portrait" />
 
-        <receiver android:name="ca.uqac.nyemo.receivers.AppReceiver">
+        <receiver android:name=".receivers.AppReceiver">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.SCREEN_ON" />
@@ -54,23 +64,39 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="ca.uqac.nyemo.face.LockServiceFilter" />
+        <service android:name=".face.LockServiceFilter" />
         <service
-            android:name="ca.uqac.nyemo.face.FaceTrainerService"
+            android:name=".face.FaceTrainerService"
             android:exported="false" />
         <service
-            android:name="ca.uqac.nyemo.move.SensorService"
+            android:name=".gait.SensorService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name="ca.uqac.nyemo.move.GaitTrainActivity" />
+        <activity
+            android:name=".gait.GaitTrainActivity"
+            android:screenOrientation="portrait" />
 
         <service
-            android:name="ca.uqac.nyemo.move.GaitTrainInfoService"
+            android:name=".gait.GaitTrainInfoService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name="ca.uqac.nyemo.voice.VoiceRecordActivity"></activity>
+        <activity android:name=".voice.VoiceRecordActivity" />
+
+        <service
+            android:name=".Services.SmartIntentService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".RegisterActivity"
+            android:label="@string/title_activity_register" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".face.FaceRecognitionActivity"
+            android:label="@string/title_activity_face_recognition">
+
+        </activity>
     </application>
 
 </manifest>
